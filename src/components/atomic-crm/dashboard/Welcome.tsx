@@ -11,9 +11,9 @@ export const Welcome = () => (
           href="https://marmelab.com/atomic-crm"
           className="underline hover:no-underline"
         >
-          Atomic CRM
+          Vilyo CRM
         </a>{" "}
-        is a template designed to help you quickly build your own CRM.
+        is a software designed to help you quickly build and manage you customers and leads.
       </p>
       <p className="text-sm mb-4">
         This demo runs on a mock API, so you can explore and modify the data. It
@@ -27,12 +27,12 @@ export const Welcome = () => (
         >
           shadcn-admin-kit
         </a>
-        , Atomic CRM is fully open-source. You can find the code at{" "}
+        , Vilyo CRM is fully open source. You can find the code at{" "}
         <a
           href="https://github.com/marmelab/atomic-crm"
           className="underline hover:no-underline"
         >
-          marmelab/atomic-crm
+          vilyoInc/vilyo-crm
         </a>
         .
       </p>
