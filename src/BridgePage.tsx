@@ -21,7 +21,8 @@ export const BridgePage = () => {
 
         // 2. SCRUB THE URL: Redirect to the actual auth callback 
         // with NO query parameters.
-        navigate('/api/auth/callback', { replace: true });
+        const hash = window.location.hash; 
+          navigate(`/api/auth/callback${hash}`, { replace: true })
     }, [searchParams, navigate]);
 
     return <div>Connecting to CRM...</div>; // Only visible for a split second

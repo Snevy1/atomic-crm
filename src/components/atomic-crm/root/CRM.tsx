@@ -158,7 +158,7 @@ export const CRM = ({
         </CustomRoutes>
         {/* 'noLayout' ensures the bridge doesn't show the CRM sidebar */}
         <CustomRoutes noLayout>
-            <Route path="/bridge" element={<BridgePage />} />
+            <Route path="/bridge/*" element={<BridgePage />} />
         </CustomRoutes>
         <Resource name="deals" {...deals} />
         <Resource name="contacts" {...contacts} />
