@@ -40,6 +40,7 @@ import {
 } from "./defaultConfiguration";
 import { i18nProvider } from "./i18nProvider";
 import { StartPage } from "../login/StartPage.tsx";
+import { BridgePage } from "@/BridgePage.tsx";
 
 export type CRMProps = {
   dataProvider?: DataProvider;
@@ -154,6 +155,10 @@ export const CRM = ({
 
         <CustomRoutes>
           <Route path={SettingsPage.path} element={<SettingsPage />} />
+        </CustomRoutes>
+        {/* 'noLayout' ensures the bridge doesn't show the CRM sidebar */}
+        <CustomRoutes noLayout>
+            <Route path="/bridge" element={<BridgePage />} />
         </CustomRoutes>
         <Resource name="deals" {...deals} />
         <Resource name="contacts" {...contacts} />

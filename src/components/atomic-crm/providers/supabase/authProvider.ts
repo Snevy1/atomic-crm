@@ -39,6 +39,17 @@ export namespace getIsInitialized {
 export const authProvider: AuthProvider = {
   ...baseAuthProvider,
   login: async (params) => {
+
+    const context = JSON.parse(localStorage.getItem('crm_context') || '{}');
+
+    // If we have an orgId from the bridge, we can use it to tag the session
+    if (context.organizationId) {
+      console.log("Logging in with Org Context:", context.organizationId);
+      // We can also save it to a separate key for the dataProvider to find later
+      localStorage.setItem('active_org_id', context.organizationId);
+    }
+
+
     const result = await baseAuthProvider.login(params);
     // clear cached sale
     cachedSale = undefined;
@@ -76,6 +87,13 @@ export const authProvider: AuthProvider = {
         message: false,
       };
     }
+
+    // If you want to be strict, verify they have an active org ID
+    // For now we can allow temporary auth :(
+    /* const activeOrg = localStorage.getItem('active_org_id');
+    if (!activeOrg && window.location.pathname !== '/bridge') {
+       // Optional: Redirect to bridge or error if they didn't come from the AI app
+    } */
 
     return baseAuthProvider.checkAuth(params);
   },
