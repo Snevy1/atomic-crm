@@ -95,6 +95,7 @@
     "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "shadcn": "^3.5.0",
+    "supabase": "^2.70.5",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",

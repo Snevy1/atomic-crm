@@ -33,7 +33,7 @@ export type Sale = {
   avatar?: RAFile;
   disabled?: boolean;
   user_id: string;
-
+  organization_id:string;
   /**
    * This is a copy of the user's email, to make it easier to handle by react admin
    * DO NOT UPDATE this field directly, it should be updated by the backend
@@ -109,6 +109,7 @@ export type ContactNote = {
   sales_id: Identifier;
   status: string;
   attachments?: AttachmentNote[];
+  organization_id: string;
 } & Pick<RaRecord, "id">;
 
 export type Deal = {
@@ -136,6 +137,7 @@ export type DealNote = {
 
   // This is defined for compatibility with `ContactNote`
   status?: undefined;
+  organization_id: string;
 } & Pick<RaRecord, "id">;
 
 export type Tag = {

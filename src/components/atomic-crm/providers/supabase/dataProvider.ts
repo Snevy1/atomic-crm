@@ -235,12 +235,45 @@ const dataProviderWithCustomMethods = {
 
 export type CrmDataProvider = typeof dataProviderWithCustomMethods;
 
+const getOrgId = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user?.user_metadata?.organization_id;
+};
+
+const injectOrgId = async (params: any) => {
+  const orgId = await getOrgId();
+  return {
+    ...params,
+    data: {
+      ...params.data,
+      organization_id: orgId,
+    },
+  };
+};
+
+// 1. Helper for Read operations (Lists)
+const injectOrgFilter = async (params: any) => {
+  const orgId = await getOrgId();
+  return {
+    ...params,
+    filter: {
+      ...params.filter,
+      organization_id: orgId, // Adds the filter to the query
+    },
+  };
+};
+
+
+
 export const dataProvider = withLifecycleCallbacks(
   dataProviderWithCustomMethods,
   [
     {
       resource: "contactNotes",
       beforeSave: async (data: ContactNote, _, __) => {
+        const orgId = await getOrgId();
+        data.organization_id = orgId;
+        
         if (data.attachments) {
           for (const fi of data.attachments) {
             await uploadToBucket(fi);
@@ -252,6 +285,8 @@ export const dataProvider = withLifecycleCallbacks(
     {
       resource: "dealNotes",
       beforeSave: async (data: DealNote, _, __) => {
+        const orgId = await getOrgId();
+        data.organization_id = orgId;
         if (data.attachments) {
           for (const fi of data.attachments) {
             await uploadToBucket(fi);
@@ -263,6 +298,8 @@ export const dataProvider = withLifecycleCallbacks(
     {
       resource: "sales",
       beforeSave: async (data: Sale, _, __) => {
+        const orgId = await getOrgId();
+        data.organization_id = orgId;
         if (data.avatar) {
           await uploadToBucket(data.avatar);
         }
@@ -272,12 +309,17 @@ export const dataProvider = withLifecycleCallbacks(
     {
       resource: "contacts",
       beforeCreate: async (params) => {
-        return processContactAvatar(params);
+        const withOrg = await injectOrgId(params);
+        console.log("withOrg", withOrg);
+        //return processContactAvatar(params);
+        return processContactAvatar(withOrg);
       },
       beforeUpdate: async (params) => {
-        return processContactAvatar(params);
+        const withOrg = await injectOrgId(params);
+        return processContactAvatar(withOrg);
       },
       beforeGetList: async (params) => {
+        //const withOrgFilter = await injectOrgFilter(params);
         return applyFullTextSearch([
           "first_name",
           "last_name",
@@ -292,6 +334,7 @@ export const dataProvider = withLifecycleCallbacks(
     {
       resource: "companies",
       beforeGetList: async (params) => {
+        //const withOrgFilter = await injectOrgFilter(params);
         return applyFullTextSearch([
           "name",
           "phone_number",
@@ -302,7 +345,8 @@ export const dataProvider = withLifecycleCallbacks(
         ])(params);
       },
       beforeCreate: async (params) => {
-        const createParams = await processCompanyLogo(params);
+        const withOrg = await injectOrgId(params);
+        const createParams = await processCompanyLogo(withOrg);
 
         return {
           ...createParams,
@@ -313,7 +357,8 @@ export const dataProvider = withLifecycleCallbacks(
         };
       },
       beforeUpdate: async (params) => {
-        return await processCompanyLogo(params);
+        const withOrg = await injectOrgId(params);
+        return await processCompanyLogo(withOrg);
       },
     },
     {
@@ -325,9 +370,30 @@ export const dataProvider = withLifecycleCallbacks(
     {
       resource: "deals",
       beforeGetList: async (params) => {
-        return applyFullTextSearch(["name", "type", "description"])(params);
+        const withOrgFilter = await injectOrgFilter(params);
+        return applyFullTextSearch(["name", "type", "description"])(withOrgFilter);
       },
+      beforeCreate: injectOrgId,
+      beforeUpdate: injectOrgId,
     },
+    {
+  resource: "tasks",
+  // Inject the Org ID before saving
+  beforeCreate: injectOrgId,
+  beforeUpdate: injectOrgId,
+  
+  // Optional: Add the "Task Counter" logic from the demo file if you want it
+  afterCreate: async (result, dataProvider) => {
+    const { contact_id } = result.data;
+    const { data: contact } = await dataProvider.getOne("contacts", { id: contact_id });
+    await dataProvider.update("contacts", {
+      id: contact_id,
+      data: { nb_tasks: (contact.nb_tasks ?? 0) + 1 },
+      previousData: contact,
+    });
+    return result;
+  },
+},
   ],
 );
 
